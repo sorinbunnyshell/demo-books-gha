@@ -1,5 +1,5 @@
 profiles:
-  backend:
+  backend_profile:
     command:
       - npm run start:dev
 
