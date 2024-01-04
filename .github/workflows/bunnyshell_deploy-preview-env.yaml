@@ -1,0 +1,44 @@
+name: Bunnyshell - Deploy Preview Environment
+on:
+  workflow_run:
+    workflows:
+      - "Bunnyshell - Prepare Preview Environment Configuration"
+    types:
+      - completed
+permissions:
+  pull-requests: write
+jobs:
+  load-artifact-from-reusable:
+    uses: sorinbunnyshell/workflows/.github/workflows/load-artifact.yaml@main
+    with:
+      workflow_run_id: ${{ github.event.workflow_run.id }}
+    outputs:
+      pr-number: ${{ steps.load-artifact.outputs.pr-number }}
+      skip-deployment: ${{ steps.load-artifact.outputs.skip-deployment }}
+      is-pull-request-event: ${{ steps.load-artifact.outputs.is-pull-request-event }}
+      bunnyshell-yaml-contents: ${{ steps.load-artifact.outputs.bunnyshell-yaml-contents }}
+
+  comment-unapproved-deployment:
+    if: ${{ needs.load-artifact-from-reusable.outputs.skip-deployment }}
+    uses: thollander/actions-comment-pull-request@v2
+    with:
+      message: |
+        ### Bunnyshell Preview Environment automatic creation skipped due to restricted files changes.
+        Add a comment containing `/bns:deploy` to approve the creation of the environment.
+      comment_tag: bunnyshell-preview-env
+      pr_number: ${{ needs.load-artifact-from-reusable.outputs.pr-number }}
+
+  deploy:
+    name: Deploy Environment
+    needs: load-artifact-from-reusable
+    uses: sorinbunnyshell/workflows/.github/workflows/deploy-env.yaml@main
+    concurrency: bns-deploy-${{ needs.load-artifact-from-reusable.outputs.pr-number }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' && needs.load-artifact-from-reusable.outputs.skip-deployment == 'false' }}
+    with:
+      pr-number: "${{ needs.load-artifact-from-reusable.outputs.pr-number }}"
+      project-id: ${{ vars.BUNNYSHELL_PROJECT_ID }}
+      cluster-id: ${{ vars.BUNNYSHELL_CLUSTER_ID }}
+      env-name: "Sylius PR #${{ needs.load-artifact-from-reusable.outputs.pr-number }}"
+      bunnyshell-yaml-contents: ${{ needs.load-artifact-from-reusable.outputs.bunnyshell-yaml-contents }}
+    secrets:
+      bunnyshell-access-token: ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }}
