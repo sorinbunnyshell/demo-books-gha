@@ -13,7 +13,7 @@ jobs:
     name: Deploy Environment
     uses: sorinbunnyshell/workflows/.github/workflows/prepare-configuration.yaml@main
     with:
-      bunnyshell-yaml-path: .bunnyshell/templates/preview/bunnyshell.yaml
+      bunnyshell-yaml-path: .bunnyshell/templates/express-react-postgres/bunnyshell.yaml
       allowed-users: ${{ vars.BUNNYSHELL_ALLOWED_USERS }}
       git-ref: refs/pull/${{ github.event.number || github.event.issue.number }}/head
       restricted-files: |
