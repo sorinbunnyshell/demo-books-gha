@@ -12,11 +12,6 @@ jobs:
     uses: sorinbunnyshell/workflows/.github/workflows/load-artifact.yaml@main
     with:
       workflow_run_id: ${{ github.event.workflow_run.id }}
-    outputs:
-      pr-number: ${{ steps.load-artifact.outputs.pr-number }}
-      skip-deployment: ${{ steps.load-artifact.outputs.skip-deployment }}
-      is-pull-request-event: ${{ steps.load-artifact.outputs.is-pull-request-event }}
-      bunnyshell-yaml-contents: ${{ steps.load-artifact.outputs.bunnyshell-yaml-contents }}
 
   comment-unapproved-deployment:
     runs-on: ubuntu-latest
