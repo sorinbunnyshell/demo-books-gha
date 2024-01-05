@@ -8,17 +8,19 @@ on:
 permissions:
   pull-requests: write
 jobs:
-  debug:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Debug workflow context
-        run: echo '${{ toJson(github) }}'
-
-
   load-artifact-from-reusable:
     uses: sorinbunnyshell/workflows/.github/workflows/load-artifact.yaml@main
     with:
       workflow_run_id: ${{ github.event.workflow_run.id }}
+
+  debug:
+    runs-on: ubuntu-latest
+    needs: load-artifact-from-reusable
+    steps:
+      - name: Debug workflow context
+        run: echo '${{ toJson(github) }}'
+      - name: Debug workflow data
+        run: echo '${{ toJson(needs.load-artifact-from-reusable.outputs) }}'
 
   comment-unapproved-deployment:
     runs-on: ubuntu-latest
