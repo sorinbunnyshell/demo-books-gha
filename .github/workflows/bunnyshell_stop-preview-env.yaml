@@ -17,7 +17,7 @@ jobs:
         run: echo $val
   stop:
     name: Stop Environment
-    uses: bunnyshell/workflows/.github/workflows/stop-env.yaml@v1
+    uses: sorinbunnyshell/workflows/.github/workflows/stop-env.yaml@main
     with:
       project-id: ${{ vars.BUNNYSHELL_PROJECT_ID }}
       pr-number: ${{ github.event.issue.number }}
