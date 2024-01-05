@@ -183,7 +183,7 @@ export default class BookList extends Component<Props, State>{
                   </div>
 
                 </li>
-              )) : 
+              )) :
               <div className="nobooks-wrap">
                   <img src={nobooks} alt="No books" />
               </div>}
