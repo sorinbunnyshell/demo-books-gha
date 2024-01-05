@@ -6,15 +6,6 @@ on:
 permissions:
   pull-requests: write
 jobs:
-  debug:
-    name: Debug values
-    runs-on: ubuntu-latest
-    env:
-      val: ${{ github.event.issue.number }}
-    steps:
-      - name: Debug values
-        id: debug
-        run: echo $val
   stop:
     name: Stop Environment
     uses: sorinbunnyshell/workflows/.github/workflows/stop-env.yaml@main
