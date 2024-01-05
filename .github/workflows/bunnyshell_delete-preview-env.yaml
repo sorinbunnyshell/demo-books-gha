@@ -10,7 +10,7 @@ on:
 permissions:
   pull-requests: write
 jobs:
-  start:
+  delete:
     name: Delete Environment
     uses: bunnyshell/workflows/.github/workflows/delete-env.yaml@v1
     with:

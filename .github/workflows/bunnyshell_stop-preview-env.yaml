@@ -6,7 +6,16 @@ on:
 permissions:
   pull-requests: write
 jobs:
-  start:
+  debug:
+    name: Debug values
+    runs-on: ubuntu-latest
+    env:
+      val: ${{ github.event.issue.number }}
+    steps:
+      - name: Debug values
+        id: debug
+        run: echo $val
+  stop:
     name: Stop Environment
     uses: bunnyshell/workflows/.github/workflows/stop-env.yaml@v1
     with:
