@@ -9,8 +9,8 @@ on:
   issue_comment:
     types: [ created, edited ]
 jobs:
-  deploy:
-    name: Deploy Environment
+  deploy_prepare:
+    name: Prepare Deployment of Environment
     uses: sorinbunnyshell/workflows/.github/workflows/prepare-configuration.yaml@main
     with:
       bunnyshell-yaml-path: .bunnyshell/templates/preview/bunnyshell.yaml
