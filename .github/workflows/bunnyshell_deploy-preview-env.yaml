@@ -1,46 +1,27 @@
 name: Bunnyshell - Deploy Preview Environment
 on:
-  workflow_run:
-    workflows:
-      - "Bunnyshell - Prepare Preview Environment Configuration"
-    types:
-      - completed
-permissions:
-  pull-requests: write
+  pull_request:
+    types: [ opened, reopened, synchronize ]
+    branches:
+      - '*'
+    paths-ignore:
+      - "*.md"
+  issue_comment:
+    types: [ created, edited ]
 jobs:
-  load-artifact-from-reusable:
-    name: Load artifact values
-    uses: sorinbunnyshell/workflows/.github/workflows/load-artifact.yaml@main
-    with:
-      workflow_run_id: ${{ github.event.workflow_run.id }}
-
-  comment-unapproved-deployment:
-    name: Comment if no deployment
-    runs-on: ubuntu-latest
-    needs: load-artifact-from-reusable
-    if: ${{ needs.load-artifact-from-reusable.outputs.skip-deployment == 'true' }}
-    steps:
-      - name: Comment on Pull Request
-        uses: thollander/actions-comment-pull-request@v2
-        with:
-          message: |
-            ### Bunnyshell Preview Environment automatic creation skipped due to restricted files changes.
-            Add a comment containing `/bns:deploy` to approve the creation of the environment.
-          comment_tag: bunnyshell-preview-env
-          pr_number: ${{ needs.load-artifact-from-reusable.outputs.pr-number }}
-
   deploy:
     name: Deploy Environment
-    needs: load-artifact-from-reusable
-    uses: sorinbunnyshell/workflows/.github/workflows/deploy-env.yaml@main
-    concurrency: bns-deploy-${{ needs.load-artifact-from-reusable.outputs.pr-number }}
-    if: ${{ github.event.workflow_run.conclusion == 'success' && needs.load-artifact-from-reusable.outputs.skip-deployment == 'false' }}
+    uses: sorinbunnyshell/workflows/.github/workflows/prepare-and-deploy-env.yaml@main
     with:
-      pr-number: ${{ needs.load-artifact-from-reusable.outputs.pr-number }}
+      pr-number: ${{ github.event.number || github.event.issue.number }}
+      git-ref: refs/pull/${{ github.event.number || github.event.issue.number }}/head
+      allowed-users: ${{ vars.BUNNYSHELL_ALLOWED_USERS }}
+      restricted-files: |
+        .bunnyshell/*
       project-id: ${{ vars.BUNNYSHELL_PROJECT_ID }}
       cluster-id: ${{ vars.BUNNYSHELL_CLUSTER_ID }}
       env-name: "Demo PR #${{ needs.load-artifact-from-reusable.outputs.pr-number }}"
-      bunnyshell-yaml-contents: ${{ needs.load-artifact-from-reusable.outputs.bunnyshell-yaml-contents }}
+      bunnyshell-yaml-path: .bunnyshell/templates/preview/bunnyshell.yaml
       comment-on-pr: true
     secrets:
       bunnyshell-access-token: ${{ secrets.BUNNYSHELL_ACCESS_TOKEN }}
